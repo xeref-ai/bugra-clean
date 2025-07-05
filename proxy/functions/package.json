@@ -1,0 +1,11 @@
+{
+  "name": "idx-proxy",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "firebase-functions": "^4.0.0"
+  },
+  "engines": {
+    "node": "18"
+  }
+}

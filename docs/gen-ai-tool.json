@@ -1,0 +1,6 @@
+{
+  "name": "MyAwesomeGenAITool",
+  "version": "1.0.0-preview",
+  "status": "public_preview",
+  "endpoint": "/api/genaiv1/process"
+}
