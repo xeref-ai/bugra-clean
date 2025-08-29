@@ -1,53 +1,38 @@
 
 'use client';
 
-import React, { useState, FormEvent, useRef } from 'react';
+import React, { useState, FormEvent } from 'react';
 import { useAuth } from '@/lib/auth';
-import { Loader2 } from 'lucide-react';
-import { IconSidebar } from '@/components/icon-sidebar';
-import { NewProjectView } from '@/components/new-project-view';
-import { EditProjectView } from '@/components/edit-project-view';
+import { Loader2, X } from 'lucide-react';
 import { ChatInterface } from '@/components/chat/chat-interface';
-import { cn } from '@/lib/utils';
 import { type Message } from '@/lib/types';
 import { useToast } from "@/hooks/use-toast";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
-type RightPanelView = 'new-project' | 'edit-project' | null;
-
-type AppSettings = {
-  model: string;
-  temperature: number;
-  systemPrompt: string;
-  useWebSearch: boolean;
+type Source = {
+  url: string;
+  title?: string;
+  summary?: string;
 };
 
 export default function DashboardPage() {
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeRightView, setActiveRightView] = useState<RightPanelView>(null);
-
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isBotLoading, setIsBotLoading] = useState(false);
   const [urlInput, setUrlInput] = useState('');
-  const [sources, setSources] = useState<string[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
+  const [isSummarizing, setIsSummarizing] = useState<Record<string, boolean>>({});
 
   const handleSendMessage = (message: string) => {
-    if (!message.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: message,
-    };
-
+    if (!message.trim() || isBotLoading) return;
+    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: message };
     setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+    setIsBotLoading(true);
 
-    // Simulate AI response
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
@@ -56,14 +41,14 @@ export default function DashboardPage() {
         model: 'Gemini 2.5 Flash',
       };
       setMessages((prev) => [...prev, aiResponse]);
-      setIsLoading(false);
+      setIsBotLoading(false);
     }, 1500);
   };
 
   const handleAddUrl = (e: FormEvent) => {
     e.preventDefault();
     if (!urlInput.trim()) return;
-    setSources([...sources, urlInput]);
+    setSources([...sources, { url: urlInput }]);
     toast({
       title: "URL Added",
       description: `The URL "${urlInput}" has been added as a source.`,
@@ -71,10 +56,51 @@ export default function DashboardPage() {
     setUrlInput('');
   };
 
+  const handleRemoveSource = (index: number) => {
+    setSources(sources.filter((_, i) => i !== index));
+  };
+
+  const handleSummarize = async (url: string, index: number) => {
+    setIsSummarizing(prev => ({ ...prev, [url]: true }));
+    try {
+      const response = await fetch('/api/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to summarize the URL.');
+      }
+
+      const { summary, title } = data;
+      const updatedSources = [...sources];
+      updatedSources[index].summary = summary;
+      updatedSources[index].title = title;
+      setSources(updatedSources);
+
+      toast({
+        title: "Summarization Successful",
+        description: `Successfully summarized the content from "${url}".`,
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Summarization Failed",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSummarizing(prev => ({ ...prev, [url]: false }));
+    }
+  };
+
   if (isAuthLoading) {
     return (
         <div className="flex h-screen w-screen items-center justify-center bg-background">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <Skeleton className="h-full w-full" />
         </div>
     );
   }
@@ -106,12 +132,36 @@ export default function DashboardPage() {
               </form>
               <div>
                 <h3 className="text-md font-semibold mb-2">Added Sources:</h3>
-                <ul className="list-disc list-inside">
+                <ul className="space-y-2">
                   {sources.map((source, index) => (
-                    <li key={index} className="truncate">
-                      <a href={source} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {source}
-                      </a>
+                    <li key={index} className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline truncate">
+                          {source.title || source.url}
+                        </a>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSummarize(source.url, index)}
+                          disabled={isSummarizing[source.url]}
+                        >
+                          {isSummarizing[source.url] ? <Loader2 className="h-4 w-4 animate-spin" /> : "Summarize"}
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleRemoveSource(index)}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {isSummarizing[source.url] && (
+                        <div className="mt-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-1/2 mt-2" />
+                        </div>
+                      )}
+                      {source.summary && !isSummarizing[source.url] && (
+                        <div className="text-sm text-gray-400 mt-2 p-2 bg-gray-800 rounded">
+                          <p className="font-semibold">Summary:</p>
+                          <p>{source.summary}</p>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -124,7 +174,7 @@ export default function DashboardPage() {
             <ChatInterface
                 messages={messages}
                 onSendMessage={handleSendMessage}
-                isBotThinking={isLoading}
+                isBotThinking={isBotLoading}
             />
         </div>
       </div>

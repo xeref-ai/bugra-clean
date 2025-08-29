@@ -1,0 +1,35 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Projects: Only authenticated users can read. Only admins can write.
+    match /projects/{projectId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Sources: Only authenticated users can read. Admins can write.
+    // Data validation for writes.
+    match /sources/{sourceId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && request.auth.token.admin == true &&
+                      request.resource.data.url is string &&
+                      request.resource.data.status == 'pending';
+      allow update: if request.auth != null && request.auth.token.admin == true;
+      allow delete: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Activity Logs: Only admins can read.
+    match /activity/{activityId} {
+      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow write: if false; // Activity should only be written by backend services
+    }
+
+    // Users: Users can only read/write their own data.
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

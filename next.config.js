@@ -1,18 +1,13 @@
+
+const {
+  NEXT_PUBLIC_ACTIVITY_ENABLED
+} = process.env;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
-      },
-    ],
-  },
+  env: {
+    NEXT_PUBLIC_ACTIVITY_ENABLED,
+  }
 };
 
 module.exports = nextConfig;
