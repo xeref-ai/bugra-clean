@@ -1,27 +1,33 @@
 
-import type {Metadata} from 'next';
-import { GeistSans, GeistMono } from 'geist/font';
+import * as Sentry from '@sentry/nextjs';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/lib/auth';
+import { Toaster } from '@/components/ui/toaster';
 
-export const metadata: Metadata = {
-  title: 'Xeref.ai',
-  description: 'AI-Powered Assistant & Task Management by Xeref.ai',
-};
+const inter = Inter({ subsets: ['latin'] });
+
+export function generateMetadata(): Metadata {
+  return {
+    title: 'Xeref.ai',
+    description: 'The future of intelligent application development.',
+    other: {
+      ...Sentry.getTraceData()
+    }
+  };
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="h-full dark">
-      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased flex flex-col min-h-screen bg-background text-foreground`}>
+    <html lang="en">
+      <body className={inter.className}>
         <AuthProvider>
-          <main className="flex-grow flex">
-            {children}
-          </main>
+          {children}
           <Toaster />
         </AuthProvider>
       </body>
