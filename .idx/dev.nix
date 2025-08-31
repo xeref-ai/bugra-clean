@@ -1,3 +1,4 @@
+
 {pkgs}: {
   channel = "stable-24.05";
   packages = [
@@ -24,3 +25,4 @@
     };
   };
 }
+# Updated to force re-evaluation
