@@ -1,0 +1,9 @@
+# Design System & Styling
+
+- **Component Library**: Prioritize using `shadcn/ui` components.
+- **Custom Components**: When creating custom components, ensure they are aesthetically pleasing, functional, and production-ready. Use rounded corners and shadows.
+- **Styling**: Use Tailwind CSS with semantic class names (`p-4`, `flex`, etc.).
+- **Theme**: All colors should be handled via CSS variables in `src/app/globals.css`. Do not use hardcoded colors (e.g., `text-red-500`). Rely on theme variables like `bg-primary`, `text-destructive`, etc.
+- **Icons**: Use icons from the `lucide-react` library. Always verify that the icon exists before using it. For icons not in Lucide, use inline SVGs.
+- **Charts**: Use the chart components from `shadcn/ui`, which are built on `recharts`.
+- **Notifications**: Use `Toast` components for displaying error messages only, not for general notifications.

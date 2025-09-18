@@ -1,0 +1,32 @@
+# Tasks
+
+- [ ] Send messages and receive responses from AI agents.
+- [ ] Choose between different AI agents (e.g., Deepseek R1, Gemini 2.5 pro, Optimus Alpha).
+- [ ] Use the microphone button to dictate messages (requires browser permission).
+- [ ] Get an AI-generated explanation for the text currently in the input box.
+- [ ] Reset chat history.
+- [ ] Agent/Chat Mode: UI switch included for future differentiation in interaction styles (currently cosmetic).
+- [ ] Add tasks with descriptions.
+- [ ] AI automatically ranks task difficulty (Easy, Medium, Hard) upon addition.
+- [ ] Tasks are visually distinguished by difficulty: Easy (Green), Medium (Orange), Hard (Red).
+- [ ] Mark tasks as completed.
+- [ ] Archive completed tasks to a separate "Archived Tasks" list.
+- [ ] Permanently delete all archived tasks.
+- [ ] AI generates three related task ideas based on your message and automatically adds them to the to-do list with ranked difficulty.
+- [ ] Display a notification when tasks have been added.
+- [ ] Split-screen layout: Chat on the left, To-Do list on the right.
+- [ ] Header includes a user profile dropdown (currently shows a static email).
+- [ ] Toast notifications for feedback (e.g., errors, tasks added).
+- [ ] Introduce an AI-powered tool that allows users to transform raster images (JPG, PNG) into vector graphics (SVG, EPS).
+- [ ] Converting logos to vector for scalability.
+- [ ] Turning hand-drawn sketches into editable vector art.
+- [ ] Vectorizing charts or diagrams for presentations.
+- [ ] Implement the AI model and the API for the vectorization tool.
+- [ ] Implement `generateResponse`
+- [ ] Implement `rankTaskDifficulty`
+- [ ] Implement `generateExplanation`
+- [ ] Implement `speechToTextTranscription`
+- [ ] Save the ideas into tasks
+- [ ] Create a new file in task folder after completed.
+- [ ] Add the task and the dropdown list
+- [ ]   

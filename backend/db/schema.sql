@@ -1,0 +1,12 @@
+-- This file will contain the database schema for the project.
+-- It can be used to set up local development databases and as a reference for the database structure.
+
+-- Example table structure (to be expanded later)
+-- CREATE TABLE users (
+--   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+--   email TEXT UNIQUE NOT NULL,
+--   display_name TEXT,
+--   photo_url TEXT,
+--   plan VARCHAR(50) DEFAULT 'Free',
+--   created_at TIMESTAMPTZ WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+-- );

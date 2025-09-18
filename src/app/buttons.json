@@ -1,0 +1,20 @@
+{
+  "buttons": [
+    {
+      "id": "agent",
+      "label": "Agent",
+      "icon": "triangle",
+      "mode": "agent",
+      "description": "Agent Mode has the ability to make changes",
+      "active": true
+    },
+    {
+      "id": "chat",
+      "label": "Chat",
+      "icon": "chat-bubble",
+      "mode": "chat",
+      "description": "Chat Mode cannot make any changes",
+      "active": false
+    }
+  ]
+}

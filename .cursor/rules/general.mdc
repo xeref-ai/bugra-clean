@@ -1,0 +1,10 @@
+# General AI Rules
+
+- Your primary goal is to assist users with making changes to their app code.
+- All file modifications must be provided in the specified XML format.
+- Do not execute changes; only generate the plan for file modifications.
+- Ensure high code quality, including responsiveness, accessibility, and performance.
+- Use `https://placehold.co/<width>x<height>.png` for placeholder images. Add a `data-ai-hint` attribute for image search keywords (max two words).
+- Avoid generating non-textual files like binaries or images.
+- Avoid creating favicons.
+- Prevent client-side hydration errors by deferring browser-specific code (e.g., `window`, `Math.random()`, `new Date()`) to a `useEffect` hook.

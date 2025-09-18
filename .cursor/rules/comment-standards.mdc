@@ -1,0 +1,5 @@
+# Code Comment Standards
+
+- **No Code Comments**: In general, do not add comments to the code. The code should be self-documenting.
+- **No Fix Comments**: When fixing errors or editing code, do not add comments explaining the fix (e.g., `// FIX: changed this value`). Just make the necessary code change.
+- **No package.json Comments**: Never add comments to `package.json`.

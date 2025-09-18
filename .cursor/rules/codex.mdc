@@ -1,0 +1,20 @@
+# Coding Guidelines
+
+## Genkit (AI)
+- Use the pre-initialized `ai` object for all Genkit operations (`ai.defineFlow`, `ai.definePrompt`, etc.).
+- Strictly follow Genkit v1.x syntax.
+- Flows must be defined in their own files with the `'use server';` directive.
+- Export the main function and its input/output types from a flow file.
+- Use Zod for schema definitions.
+- Use Handlebars for prompt templating. Do not put logic or function calls in templates.
+- Pass file data to flows as data URIs.
+- Use `googleai/gemini-2.5-flash-preview-image-generation` for image generation.
+- Use `gemini-2.5-flash-preview-tts` and the `wav` package for Text-to-Speech.
+- Use `ai.defineTool` for function calling when the LLM needs to make a decision.
+- Configure Gemini safety filters (`safetySettings`) if needed.
+
+## General Code Quality
+- Write clean, readable, and well-organized code.
+- Prioritize functional components and React hooks.
+- Ensure every component has a single root JSX element.
+- Do not add comments to `package.json`.

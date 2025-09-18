@@ -1,0 +1,29 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://xeref.ai/</loc>
+    <lastmod>2024-08-19</lastmod>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://xeref.ai/about</loc>
+    <lastmod>2024-08-19</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xeref.ai/xerenity-society</loc>
+    <lastmod>2024-08-19</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xeref.ai/blog</loc>
+    <lastmod>2024-08-19</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xeref.ai/contact</loc>
+    <lastmod>2024-08-19</lastmod>
+    <priority>0.80</priority>
+  </url>
+</urlset>

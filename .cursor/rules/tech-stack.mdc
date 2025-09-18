@@ -1,0 +1,10 @@
+# Tech Stack
+
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **UI Library**: React
+- **Component Library**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **AI/GenAI**: Genkit
+- **Icons**: lucide-react
+- **Charts**: recharts (via shadcn/ui)

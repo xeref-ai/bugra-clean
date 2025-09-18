@@ -1,0 +1,11 @@
+# Frontend Instructions (Next.js & React)
+
+- **App Router**: Use the Next.js App Router for all routing.
+- **Server Components**: Default to React Server Components to minimize client-side JavaScript.
+- **TypeScript**: Use `import type` for type-only imports.
+- **Component Design**: Create isolated, reusable components. Use default props for flexibility.
+- **Data Mutations**: Use Next.js Server Actions for form submissions and data mutations.
+- **Error Handling**: Implement `error.js` files as error boundaries at appropriate route segments.
+- **Image Optimization**: Always use the `next/image` component for images.
+- **State Management**: Use React hooks (`useState`, `useEffect`, etc.) for state management.
+- **Hydration Errors**: To avoid hydration mismatches, move any code that relies on browser-specific APIs (`window`, `localStorage`, `Math.random()`, etc.) into a `useEffect` hook with an empty dependency array.
