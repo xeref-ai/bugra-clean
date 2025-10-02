@@ -1,5 +1,5 @@
 // functions/src/chat.js
-const { onCall } = require("firebase-functions/v2/httpsİ");
+const { onCall } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 
 /**
