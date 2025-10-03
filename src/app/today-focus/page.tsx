@@ -1,7 +1,7 @@
 
 'use client';
 
-import { TodayFocusPanel } from '@/components/today-focus-panel';
+import TodayFocusPanel from '@/components/today-focus-panel';
 
 export default function TodayFocusPage() {
   return <TodayFocusPanel />;

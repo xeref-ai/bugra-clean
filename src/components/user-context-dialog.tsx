@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/lib/auth';
-import { getUserContextFromFirestore } from '@/lib/firestore';
+import { getUserContext } from '@/lib/firestore';
 
 interface UserContextDialogProps {
   open: boolean;
@@ -27,7 +27,7 @@ export const UserContextDialog: React.FC<UserContextDialogProps> = ({ open, onOp
 
   useEffect(() => {
     if (user && open) {
-      getUserContextFromFirestore(user.uid).then(userContext => {
+      getUserContext(user.uid).then(userContext => {
         if (userContext && typeof userContext.context === 'string') {
           setContext(userContext.context);
         } else {

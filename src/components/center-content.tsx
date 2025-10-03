@@ -45,7 +45,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LogoSvg, SparkleIcon } from '@/components/icons';
 import { useAuth } from '@/lib/auth';
-import { TodayFocusPanel } from '@/components/today-focus-panel';
+import TodayFocusPanel from '@/components/today-focus-panel';
 import { CaseStudyCarousel } from '@/components/case-study-carousel';
 import { analytics } from '@/lib/firebase';
 import { logEvent } from 'firebase/analytics';
@@ -289,7 +289,7 @@ export const CenterContent = ({
                             </Tooltip>
                         </TooltipProvider>
                         <DialogContent className="bg-transparent border-none p-0 max-w-2xl shadow-none">
-                            <TodayFocusPanel onClose={() => setIsFocusModalOpen(false)} onAddToChat={handleAddToChat} />
+                            <TodayFocusPanel />
                         </DialogContent>
                     </Dialog>
                 </div>
