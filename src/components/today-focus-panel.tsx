@@ -1,78 +1,50 @@
-
-'use client';
-
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from '@/components/ui/badge';
-import { X, Lightbulb, MessageSquare } from 'lucide-react';
-import { type Task } from '@/lib/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { CheckCircle, Zap, Target, Rocket } from 'lucide-react';
 
-const focusTasks: Task[] = [
-    { id: '1', title: 'Finalize Q3 marketing report', status: 'todo', priority: 'High', createdAt: new Date() },
-    { id: '2', title: 'Prepare for investor meeting', status: 'todo', priority: 'High', createdAt: new Date() },
-    { id: '3', title: 'Review new UI/UX mockups', status: 'todo', priority: 'Medium', createdAt: new Date() },
-];
-
-const productivityQuote = {
-    text: "The key is not to prioritize what's on your schedule, but to schedule your priorities.",
-    author: "Stephen Covey"
-};
-
-export const TodayFocusPanel = ({ onClose, onAddToChat }: { onClose: () => void; onAddToChat: (jsonString: string) => void; }) => {
-  
-  const handleAddToChatClick = () => {
-    const focusData = {
-      summary: "Today's Focus",
-      tasks: focusTasks.map(task => ({
-        task: task.title,
-        priority: task.priority
-      })),
-      quote: productivityQuote.text,
-      author: productivityQuote.author
-    };
-
-    const jsonString = JSON.stringify(focusData, null, 2);
-    onAddToChat(jsonString);
-  };
-
+const TodayFocusPanel = () => {
   return (
-    <div className="bg-[#1A1D21] text-gray-300 rounded-lg shadow-2xl border border-gray-800 flex flex-col h-[70vh] max-h-[600px] w-full">
-      <header className="p-4 flex justify-between items-center border-b border-gray-800 flex-shrink-0">
-        <h2 className="text-lg font-semibold text-white">Today's Focus</h2>
-        <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-400 hover:text-white">
-          <X size={20} />
-        </Button>
-      </header>
+    <div className="h-full bg-black text-white p-6">
+      <h2 className="text-2xl font-bold mb-4">Today's Focus: October 03, 2025</h2>
+      <Separator className="bg-gray-700" />
 
-      <ScrollArea className="flex-1">
-        <div className="p-6 space-y-4">
-          {focusTasks.map(task => (
-            <div key={task.id} className="flex items-center p-3 bg-[#2C2D30] rounded-md">
-                <Checkbox id={`focus-${task.id}`} className="mr-3 h-5 w-5 border-gray-600" />
-                <label htmlFor={`focus-${task.id}`} className="flex-grow text-sm">{task.title}</label>
-                <Badge variant="outline" className="ml-2">{task.priority}</Badge>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+      {/* Q4 Goals */}
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold flex items-center"><Rocket className="mr-2 h-5 w-5" />Q4 Goals: The Next Horizon</h3>
+        <ul className="list-none space-y-2 mt-2">
+          <li className="flex items-start"><CheckCircle className="text-green-500 mr-2 mt-1 h-4 w-4 flex-shrink-0" /> Launch CI/CD pipeline for automated, consistent deployments.</li>
+          <li className="flex items-start"><CheckCircle className="text-green-500 mr-2 mt-1 h-4 w-4 flex-shrink-0" /> Harden security by reviewing Firestore rules and auditing secrets.</li>
+          <li className="flex items-start"><CheckCircle className="text-gray-500 mr-2 mt-1 h-4 w-4 flex-shrink-0" /> Optimize Next.js bundle size and review Cloud Run scaling.</li>
+        </ul>
+      </div>
 
-      <footer className="p-6 border-t border-gray-800 mt-auto flex-shrink-0">
-        <div className="flex items-start text-sm">
-            <Lightbulb className="h-5 w-5 text-yellow-400 mr-3 flex-shrink-0 mt-1" />
-            <div>
-                <p className="italic">"{productivityQuote.text}"</p>
-                <p className="text-right text-gray-500 mt-1">- {productivityQuote.author}</p>
-            </div>
-        </div>
-        <div className="mt-6 text-center">
-            <Button onClick={handleAddToChatClick}>
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Use in Chat
-            </Button>
-        </div>
-      </footer>
+      <Separator className="my-6 bg-gray-700" />
+
+      {/* Playbook Shortcuts */}
+      <div>
+        <h3 className="text-lg font-semibold flex items-center"><Zap className="mr-2 h-5 w-5" />Playbook Shortcuts</h3>
+        <ul className="list-none space-y-2 mt-2 text-sm">
+          <li><kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">Ctrl</kbd> + <kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">M</kbd> - Open Microphone</li>
+          <li><kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">Ctrl</kbd> + <kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">E</kbd> - Generate Explanation</li>
+          <li><kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">Ctrl</kbd> + <kbd className="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg">R</kbd> - Reset Chat</li>
+        </ul>
+      </div>
+
+      <Separator className="my-6 bg-gray-700" />
+
+      {/* Archived Q3 */}
+      <div>
+        <h3 className="text-lg font-semibold flex items-center text-gray-500"><Target className="mr-2 h-5 w-5" />Archived: Q3 Achievements</h3>
+        <ul className="list-disc list-inside space-y-2 mt-2 text-gray-400">
+          <li>Successfully integrated multiple AI agents.</li>
+          <li>Implemented AI-powered task difficulty ranking.</li>
+          <li>Resolved critical microphone permission and Firestore connectivity bugs.</li>
+        </ul>
+      </div>
+
     </div>
   );
 };
+
+export default TodayFocusPanel;

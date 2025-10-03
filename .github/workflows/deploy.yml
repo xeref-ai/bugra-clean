@@ -1,187 +1,53 @@
-name: Coordinated Deploy
+# GitHub Actions CI/CD Workflow for Xeref.ai
+
+name: Deploy to Firebase Hosting
 
 on:
   push:
-    tags:
-      - 'v*'
     branches:
-      - main
-  pull_request:
-    branches:
-      - main
+      - main # Or your primary development branch, e.g., 'develop'
 
 jobs:
-  validate-versions:
-    name: Validate Code ↔️ Infra Versions
+  build_and_deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
-    outputs:
-      code-version: ${{ steps.check.outputs.code-version }}
-      infra-version: ${{ steps.check.outputs.infra-version }}
-      required-infra-range: ${{ steps.check.outputs.required-infra-range }}
-      compatible: ${{ steps.check.outputs.compatible }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20' # Specify the Node.js version used in your project
+          cache: 'npm'
 
-      - name: Install semver
-        run: npm install -g semver
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Extract and Validate Versions
-        id: check
-        run: |
-          CODE_VERSION=$(node -p "require('./package.json').version")
-          REQUIRED_INFRA_RANGE=$(node -p "require('./package.json').config.requiredInfraVersion")
-          CURRENT_INFRA_VERSION=$(grep '^version' terraform/version.tf | cut -d'\"' -f2)
-          
-          echo "code-version=$CODE_VERSION" >> $GITHUB_OUTPUT
-          echo "infra-version=$CURRENT_INFRA_VERSION" >> $GITHUB_OUTPUT
-          echo "required-infra-range=$REQUIRED_INFRA_RANGE" >> $GITHUB_OUTPUT
-          
-          if semver "$CURRENT_INFRA_VERSION" -r "$REQUIRED_INFRA_RANGE"; then
-            echo "compatible=true" >> $GITHUB_OUTPUT
-            echo "✅ Infra version $CURRENT_INFRA_VERSION is compatible with required range $REQUIRED_INFRA_RANGE"
-          else
-            echo "compatible=false" >> $GITHUB_OUTPUT
-            echo "::error::Incompatible infra version $CURRENT_INFRA_VERSION for code $CODE_VERSION. Required range: $REQUIRED_INFRA_RANGE"
-            exit 1
-          fi
-
-  deploy-infrastructure:
-    name: Deploy Infrastructure (${{ matrix.environment }})
-    needs: validate-versions
-    if: needs.validate-versions.outputs.compatible == 'true' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        include:
-          - environment: staging
-            project_id: xerefai-staging
-          - environment: production
-            project_id: xerefai
-    
-    environment: ${{ matrix.environment }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.0
-
-      - name: Terraform Init
-        id: init
-        run: |
-          terraform -chdir=terraform/environments/${{ matrix.environment }} init \
-            -backend-config="bucket=xerefai-${{ matrix.environment }}-tfstate" \
-            -backend-config="prefix=infrastructure"
-        
-      - name: Terraform Plan
-        id: plan
-        run: |
-          terraform -chdir=terraform/environments/${{ matrix.environment }} plan \
-            -var="project_id=${{ matrix.project_id }}" \
-            -var="deployment_version=${{ needs.validate-versions.outputs.code-version }}" \
-            -var="git_commit=${{ github.sha }}" \
-            -var="organization_id=${{ secrets.GOOGLE_ORG_ID }}" \
-            -var="billing_account=${{ secrets.GCP_BILLING_ACCOUNT_ID }}" \
-            -out=tfplan
-
-      - name: Terraform Apply
-        id: apply
-        run: terraform -chdir=terraform/environments/${{ matrix.environment }} apply -auto-approve tfplan
-
-  deploy-functions:
-    name: Deploy Functions (${{ matrix.environment }})
-    needs: [validate-versions, deploy-infrastructure]
-    if: needs.validate-versions.outputs.compatible == 'true' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
-    runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        include:
-          - environment: staging
-            project_id: xerefai-staging
-          - environment: production
-            project_id: xerefai
-            
-    environment: ${{ matrix.environment }}
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Inject Version Metadata into Functions
-        run: |
-          mkdir -p functions/src
-          echo "export const DEPLOYMENT_VERSION = '${{ needs.validate-versions.outputs.code-version }}';" > functions/src/version.js
-          echo "export const INFRASTRUCTURE_VERSION = '${{ needs.validate-versions.outputs.infra-version }}';" >> functions/src/version.js
-          echo "export const BUILD_TIMESTAMP = '$(date -u +%Y-%m-%dT%H:%M:%SZ)';" >> functions/src/version.js
-          echo "export const ENVIRONMENT = '${{ matrix.environment }}';" >> functions/src/version.js
-          
-          cat functions/src/version.js
-
-      - name: Deploy Firebase Functions
-        run: firebase deploy --only functions --project ${{ matrix.project_id }} --token '${{ secrets.FIREBASE_TOKEN }}' --message "Deploy v${{ needs.validate-versions.outputs.code-version }} to ${{ matrix.environment }}"
+      - name: Build Application
+        run: npm run build
         env:
-          GCP_PROJECT_ID: ${{ matrix.project_id }}
-          GCP_ENVIRONMENT: ${{ matrix.environment }}
+          # This allows Next.js to build without requiring all runtime env vars
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+          # Add other build-time environment variables here if needed
 
-      - name: Verify Function Deployment Consistency
-        run: |
-          echo "Running post-deployment verification for functions in ${{ matrix.environment }}..."
-          # Placeholder for the verification script
-          # node scripts/verify-deployment-consistency.js \
-          #   --project=${{ matrix.project_id }} \
-          #   --code-version="${{ needs.validate-versions.outputs.code-version }}" \
-          #   --infra-version="${{ needs.validate-versions.outputs.infra-version }}"
+      # --- Deployment Steps ---
+      # The following steps are placeholders. You will need to configure
+      # authentication with Google Cloud by creating a Service Account and
+      # adding its key as a secret in your GitHub repository.
 
-  deploy-monitoring:
-    name: Deploy Monitoring (${{ matrix.environment }})
-    needs: [deploy-infrastructure]
-    if: needs.validate-versions.outputs.compatible == 'true' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
-    runs-on: ubuntu-latest
+      # - name: Authenticate with Google Cloud
+      #   uses: 'google-github-actions/auth@v2'
+      #   with:
+      #     credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-    strategy:
-      matrix:
-        include:
-          - environment: staging
-            project_id: xerefai-staging
-          - environment: production
-            project_id: xerefai
-
-    environment: ${{ matrix.environment }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
-
-      - name: Deploy Monitoring Configuration
-        run: |
-          gcloud monitoring dashboards create --config-from-file=monitoring/quota-dashboard.yaml --project=${{ matrix.project_id }}
-          gcloud alpha monitoring policies create --policy-from-file=monitoring/alerts.yaml --project=${{ matrix.project_id }}
+      # - name: Deploy to Firebase Hosting
+      #   uses: 'FirebaseExtended/action-hosting-deploy@v0'
+      #   with:
+      #     repoToken: '${{ secrets.GITHUB_TOKEN }}'
+      #     firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+      #     channelId: live # Or a preview channel for non-main branches
+      #     projectId: 'xerefai-prod' # Your Firebase project ID
