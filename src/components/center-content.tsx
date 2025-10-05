@@ -28,6 +28,8 @@ import {
   Dialog,
   DialogContent,
   DialogTrigger,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Tooltip,
@@ -289,6 +291,9 @@ export const CenterContent = ({
                             </Tooltip>
                         </TooltipProvider>
                         <DialogContent className="bg-transparent border-none p-0 max-w-2xl shadow-none">
+                            <DialogHeader>
+                              <DialogTitle className="sr-only">Today's Focus</DialogTitle>
+                            </DialogHeader>
                             <TodayFocusPanel />
                         </DialogContent>
                     </Dialog>

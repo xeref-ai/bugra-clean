@@ -1,74 +1,15 @@
-# Settings for a Next.js app.
+
 runConfig:
   minInstances: 0
-  maxInstances: 10
-  concurrency: 80
-  cpu: 0.5
-  memoryMiB: 512
+  maxInstances: 100
+  cpu: 1
+  memoryMiB: 1024
 env:
   - variable: NEXT_PUBLIC_FIREBASE_API_KEY
-    value: ${env:NEXT_PUBLIC_FIREBASE_API_KEY}
-    availability:
-      - BUILD
-      - RUNTIME
+    value: '{{.X_FIREBASE_API_KEY}}'
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-    value: ${env:NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN}
-    availability:
-      - BUILD
-      - RUNTIME
+    value: '{{.X_FIREBASE_AUTH_DOMAIN}}'
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: ${env:NEXT_PUBLIC_FIREBASE_PROJECT_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-    value: ${env:NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-    value: ${env:NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
-    value: ${env:NEXT_PUBLIC_FIREBASE_APP_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
-    value: ${env:NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: STRIPE_SECRET_KEY
-    value: ${env:STRIPE_SECRET_KEY}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: STRIPE_WEBHOOK_SECRET
-    value: ${env:STRIPE_WEBHOOK_SECRET}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-    value: ${env:NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: STRIPE_PRO_PRICE_ID
-    value: ${env:STRIPE_PRO_PRICE_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: STRIPE_TEAM_PRICE_ID
-    value: ${env:STRIPE_TEAM_PRICE_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-  - variable: STRIPE_ULTRA_PRICE_ID
-    value: ${env:STRIPE_ULTRA_PRICE_ID}
-    availability:
-      - BUILD
-      - RUNTIME
-buildCommand: npm run build
+    value: '{{.X_FIREBASE_PROJECT_ID}}'
+  - variable: FIREBASE_SERVICE_ACCOUNT
+    secret: firebase-service-account
