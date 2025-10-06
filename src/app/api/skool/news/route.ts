@@ -1,9 +1,6 @@
 
 import { NextResponse } from 'next/server';
-import { db, customInitApp } from '@/lib/firebase-admin';
-
-// Initialize Firebase Admin SDK for this route
-customInitApp();
+import { db } from '@/lib/firebase-admin';
 
 export async function GET() {
   if (!db) {
@@ -16,6 +13,7 @@ export async function GET() {
     return NextResponse.json(news);
   } catch (error) {
     console.error('Error fetching Skool news:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    // The "client is offline" error often originates here if the admin SDK is not authenticated.
+    return new NextResponse('Internal Server Error: ' + (error as Error).message, { status: 500 });
   }
 }

@@ -1,23 +1,18 @@
 
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import bundleAnalyzer from '@next/bundle-analyzer';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    // Force SWC to transpile undici
-    config.module.rules.push({
-      test: /node_modules\/undici\/.+\.js$/,
-      use: {
-        loader: 'next-swc-loader',
-      },
-    });
-
-    // Fallback for missing modules
-    config.resolve.fallback = {
-      "mongodb-client-encryption": false,
-      "aws4": false
-    };
-
-    return config;
-  }
+  // Your existing Next.js config goes here
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

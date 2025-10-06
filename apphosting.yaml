@@ -1,6 +1,6 @@
 
 runConfig:
-  minInstances: 0
+  minInstances: 1
   maxInstances: 100
   cpu: 1
   memoryMiB: 1024
@@ -10,6 +10,6 @@ env:
   - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
     value: '{{.X_FIREBASE_AUTH_DOMAIN}}'
   - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
-    value: '{{.X_FIREBASE_PROJECT_ID}}'
+    value: '{{.X_FIRE-BASE_PROJECT_ID}}'
   - variable: FIREBASE_SERVICE_ACCOUNT
     secret: firebase-service-account
