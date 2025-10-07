@@ -1,43 +1,31 @@
 # terraform/main.tf
-
-terraform {
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.0"
-    }
-  }
-}
-
 provider "google" {
   project = var.project_id
   region  = var.region
 }
 
-resource "google_project_service" "firebase_api" {
-  service = "firebase.googleapis.com"
+# Construct the service account email dynamically using the provided project number
+locals {
+  app_hosting_agent_email = "service-${var.project_number}@gcp-sa-firebaseapphosting.iam.gserviceaccount.com"
 }
 
-resource "google_project_service" "firestore_api" {
-  service = "firestore.googleapis.com"
-  disable_on_destroy = false
+# Grant the required IAM Roles to the App Hosting Service Agent
+resource "google_project_iam_member" "app_hosting_runner" {
+  project = var.project_id
+  role    = "roles/firebaseapphosting.computeRunner"
+  member  = "serviceAccount:${local.app_hosting_agent_email}"
 }
 
-resource "google_project_service" "cloudfunctions_api" {
-  service = "cloudfunctions.googleapis.com"
+# Grant permissions for the Firebase Admin SDK to function correctly
+resource "google_project_iam_member" "firebase_admin" {
+  project = var.project_id
+  role    = "roles/firebase.admin"
+  member  = "serviceAccount:${local.app_hosting_agent_email}"
 }
 
-resource "google_project_service" "cloudbuild_api" {
-  service = "cloudbuild.googleapis.com"
-}
-
-resource "google_project_service" "secretmanager_api" {
-  service = "secretmanager.googleapis.com"
-}
-
-resource "google_project" "main" {
-  project_id      = var.project_id
-  name            = var.project_id
-  billing_account = var.billing_account
-  org_id          = var.org_id
+# Grant permissions for Firestore access
+resource "google_project_iam_member" "app_hosting_datastore_user" {
+  project = var.project_id
+  role    = "roles/datastore.user"
+  member  = "serviceAccount:${local.app_hosting_agent_email}"
 }
