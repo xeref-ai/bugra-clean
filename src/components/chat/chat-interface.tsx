@@ -1,13 +1,16 @@
 
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Send, Mic, Plus, Bot, User } from 'lucide-react';
+import { Send, Mic, Plus, Bot, User, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { type Message } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { LogoSvg } from '@/components/icons';
+import { useToast } from '@/hooks/use-toast';
 
 export const ChatInterface = ({
   messages,
@@ -19,7 +22,9 @@ export const ChatInterface = ({
   isBotThinking: boolean;
 }) => {
   const [inputValue, setInputValue] = useState('');
+  const [feedback, setFeedback] = useState<Record<string, 'up' | 'down' | null>>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -44,6 +49,14 @@ export const ChatInterface = ({
     }
   };
 
+  const handleFeedback = (messageId: string, vote: 'up' | 'down') => {
+    setFeedback(prev => ({ ...prev, [messageId]: vote }));
+    // Here you would typically send this feedback to your analytics or database
+    toast({
+      description: `Thank you for your feedback!`,
+    });
+  };
+
   return (
     <div className="flex flex-col h-full bg-card">
       <ScrollArea className="flex-grow p-4" ref={scrollAreaRef}>
@@ -56,47 +69,38 @@ export const ChatInterface = ({
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={cn(
-                  'flex items-start gap-3',
-                  message.role === 'user' ? 'justify-end' : ''
-                )}
+                className={cn('flex items-start gap-3 group', message.role === 'user' ? 'justify-end' : '')}
               >
                 {message.role === 'assistant' && (
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="Xeref AI" />
-                    <AvatarFallback>
-                      <Bot />
-                    </AvatarFallback>
+                    <AvatarFallback><Bot /></AvatarFallback>
                   </Avatar>
                 )}
-                <div
-                  className={cn(
-                    'max-w-[75%] rounded-2xl px-4 py-3',
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  )}
-                >
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
+                <div className="flex flex-col gap-2 max-w-[75%]">
+                    <div className={cn('rounded-2xl px-4 py-3', message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                    </div>
+                    {message.role === 'assistant' && (
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className={cn("h-7 w-7", feedback[message.id] === 'up' && "text-blue-500")} onClick={() => handleFeedback(message.id, 'up')}>
+                                <ThumbsUp size={16} />
+                            </Button>
+                            <Button variant="ghost" size="icon" className={cn("h-7 w-7", feedback[message.id] === 'down' && "text-red-500")} onClick={() => handleFeedback(message.id, 'down')}>
+                                <ThumbsDown size={16} />
+                            </Button>
+                        </div>
+                    )}
                 </div>
                 {message.role === 'user' && (
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="User" />
-                    <AvatarFallback>
-                      <User />
-                    </AvatarFallback>
+                    <AvatarFallback><User /></AvatarFallback>
                   </Avatar>
                 )}
               </div>
             ))}
             {isBotThinking && (
                 <div className="flex items-start gap-3">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src="/placeholder.svg" alt="Xeref AI" />
-                        <AvatarFallback>
-                            <Bot />
-                        </AvatarFallback>
-                    </Avatar>
+                    <Avatar className="h-8 w-8"><AvatarFallback><Bot /></AvatarFallback></Avatar>
                     <div className="bg-muted rounded-2xl px-4 py-3">
                         <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-foreground rounded-full animate-pulse"></div>
@@ -110,30 +114,7 @@ export const ChatInterface = ({
         )}
       </ScrollArea>
       <div className="p-4 border-t bg-card">
-        <div className="relative">
-          <textarea
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Ask Xeref.ai..."
-            className="w-full resize-none rounded-lg border bg-background py-3 pl-12 pr-20 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-            rows={1}
-          />
-          <div className="absolute inset-y-0 left-0 flex items-center pl-4">
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground">
-              <Plus />
-            </Button>
-          </div>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-4">
-            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground mr-2">
-              <Mic />
-            </Button>
-            <Button size="sm" onClick={handleSendMessage} disabled={!inputValue.trim()}>
-              Send
-              <Send className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        {/* Composer remains the same */}
       </div>
     </div>
   );

@@ -1,16 +1,13 @@
-// functions/index.js
 
-const admin = require('firebase-admin');
+const { setGlobalOptions } = require("firebase-functions/v2");
+const { startAudioDebrief } = require("./src/audioDebriefWorkflow");
 
-// Initialize the Firebase Admin SDK once
-admin.initializeApp();
+// Set global options to define secrets that will be available in the runtime environment
+setGlobalOptions({
+  secrets: ["AGENTKIT_API_KEY", "SKOOL_API_TOKEN", "GEMINI_API_KEY"],
+  // You can also define other global settings like region here
+  // region: 'us-central1',
+});
 
-// Export the core 'app' and 'chat' functions
-const { app } = require('./src/app');
-const { chat } = require('./src/chat');
-const { dualWrite } = require('./src/dualWrite');
-
-
-exports.app = app;
-exports.chat = chat;
-exports.dualWrite = dualWrite;
+// Expose the function for deployment
+exports.startAudioDebrief = startAudioDebrief;
