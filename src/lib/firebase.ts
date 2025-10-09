@@ -2,10 +2,9 @@
 // src/lib/firebase.ts
 import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
-import { getAnalytics, type Analytics } from 'firebase/analytics';
+import { getFirestore, type Firestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getAnalytics, type Analytics, isSupported } from 'firebase/analytics';
 import { getPerformance, type FirebasePerformance } from 'firebase/performance';
-import { initializeAppCheck, ReCaptchaV3Provider, type AppCheck } from 'firebase/app-check';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,40 +16,41 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-export const isFirebaseEnabled =
-  !!firebaseConfig.apiKey &&
-  !!firebaseConfig.projectId &&
-  !!firebaseConfig.appId;
+export const isFirebaseEnabled = !!firebaseConfig.apiKey;
 
+// --- Core App Initialization (Runs on Server and Client) ---
 let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let analytics: Analytics | undefined;
-let perf: FirebasePerformance | undefined;
-let appCheck: AppCheck | undefined;
-
 if (isFirebaseEnabled) {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
-  }
-
-  auth = getAuth(app);
-  db = getFirestore(app);
-
-  if (typeof window !== 'undefined') {
-    analytics = getAnalytics(app);
-    perf = getPerformance(app);
-
-    if (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-      appCheck = initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
-        isTokenAutoRefreshEnabled: true,
-      });
-    }
-  }
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 }
 
-// @ts-ignore
-export { app, auth, db, analytics, perf, appCheck };
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// --- Client-Side Service Initialization ---
+let analytics: Analytics | undefined;
+let perf: FirebasePerformance | undefined;
+let isClientInitialized = false;
+
+// This function initializes services and ensures it only runs once.
+export const initializeClientServices = async () => {
+  if (typeof window !== 'undefined' && !isClientInitialized) {
+    isClientInitialized = true; // Mark as initialized to prevent re-running
+
+    // Enable offline persistence first
+    await enableIndexedDbPersistence(db).catch(console.warn);
+    
+    // Check if Analytics is supported by the browser and then initialize
+    if (await isSupported()) {
+      analytics = getAnalytics(app);
+      perf = getPerformance(app);
+    }
+  }
+};
+
+// **The Fix**: A getter function to safely access initialized services.
+// Components will call this function instead of importing 'analytics' directly.
+export const getFirebaseServices = () => ({
+  analytics,
+  perf,
+});

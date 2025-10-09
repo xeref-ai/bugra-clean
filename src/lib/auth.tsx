@@ -19,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const ULTRA_USERS = [
     'bugrakarsli@gmail.com',
     'bugra@bugrakarsli.com',
+    'bugra@xeref.ai',
 ];
 
 async function syncUser(user: User) {
