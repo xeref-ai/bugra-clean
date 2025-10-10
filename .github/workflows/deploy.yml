@@ -1,17 +1,20 @@
-# GitHub Actions CI/CD Workflow for Xeref.ai
 
-name: Deploy to Firebase Hosting
+# GitHub Actions CI/CD Workflow for the Xeref.ai Enterprise-Grade Evolution Plan
+name: Build, Test, and Deploy to Firebase
 
 on:
   push:
     branches:
-      - main # Or your primary development branch, e.g., 'develop'
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  build_and_deploy:
-    name: Build and Deploy
+  build_and_test:
+    name: Build and Test
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -19,35 +22,57 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Specify the Node.js version used in your project
+          node-version: '20'
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci # Use 'ci' for reproducible builds
+
+      - name: Lint Code
+        run: npm run lint
+
+      # - name: Run Unit Tests # Placeholder for when tests are added
+      #   run: npm test
 
       - name: Build Application
         run: npm run build
         env:
-          # This allows Next.js to build without requiring all runtime env vars
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
           NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          # Add other build-time environment variables here if needed
 
-      # --- Deployment Steps ---
-      # The following steps are placeholders. You will need to configure
-      # authentication with Google Cloud by creating a Service Account and
-      # adding its key as a secret in your GitHub repository.
+  deploy_preview:
+    name: Deploy to Preview Channel
+    needs: build_and_test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Deploy to Firebase Hosting Preview Channel
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: 'xerefai-prod'
+          # This automatically creates and deploys to a unique preview URL for each PR
 
-      # - name: Authenticate with Google Cloud
-      #   uses: 'google-github-actions/auth@v2'
-      #   with:
-      #     credentials_json: '${{ secrets.GCP_SA_KEY }}'
+  deploy_production:
+    name: Deploy to Production
+    needs: build_and_test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
 
-      # - name: Deploy to Firebase Hosting
-      #   uses: 'FirebaseExtended/action-hosting-deploy@v0'
-      #   with:
-      #     repoToken: '${{ secrets.GITHUB_TOKEN }}'
-      #     firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-      #     channelId: live # Or a preview channel for non-main branches
-      #     projectId: 'xerefai-prod' # Your Firebase project ID
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase App Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: 'xerefai-prod'
+          channelId: live # Deploy to the main 'live' channel
